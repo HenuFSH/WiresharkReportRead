@@ -1,44 +1,24 @@
 import os
 
-class TreeBase(object):
+class Node(object):
     def __init__(self, value) -> None:
         super().__init__()
         self.value = value
         self.sub_dict={}
 
+    def insert_sub_node(self, value) -> "Node":
+        if not self.sub_dict.__contains__(value):
+            self.sub_dict[value] = Node(value)
+        return self.sub_dict[value]
+
     def display(self):
         print(self.value, end=',')
-        for sub_value in self.sub_dict.values():
-            sub_value.display()
+        for sub_node in self.sub_dict.values():
+            sub_node.display()
 
-class Port(TreeBase):
-    def __init__(self, port) -> None:
-        super().__init__(port)
-
-class Protocol(TreeBase):
-    def __init__(self, protocol) -> None:
-        super().__init__(protocol)
-
-    def insert_port(self, port) -> None:
-        self.sub_dict[port] = Port(port)
-
-class IP(TreeBase):
-    def __init__(self, ip) -> None:
-        super().__init__(ip)
-
-    def get_sub_node(self, protocol) -> Protocol:
-        if not self.sub_dict.__contains__(protocol):
-            self.sub_dict[protocol] = Protocol(protocol)
-        return self.sub_dict[protocol]
-
-class Root(TreeBase):
+class Root(Node):
     def __init__(self, root) -> None:
         super().__init__(root)
-
-    def get_sub_node(self, ip) -> IP:
-        if not self.sub_dict.__contains__(ip):
-            self.sub_dict[ip] = IP(ip)
-        return self.sub_dict[ip]
 
     def display(self):
         for sub_value in self.sub_dict.values():
@@ -60,7 +40,7 @@ def read_ip_list(filename) -> Root:
                     protocol = value
                 elif line[0] == ' ' and line[1] == ' ' and line[2] == ' ' and line[3] != ' ':
                     port=value
-                    root.get_sub_node(ip).get_sub_node(protocol).insert_port(port)
+                    root.insert_sub_node(ip).insert_sub_node(protocol).insert_sub_node(port)
     return root
 
 def ip_port_diff(root1:Root, root2:Root) -> Root:
@@ -77,7 +57,7 @@ def ip_port_merge(root1:Root, root2:Root) -> Root:
     for ip in root2.sub_dict.values():
         for protocol in ip.sub_dict.values():
             for port in protocol.sub_dict.values():
-                new_root.get_sub_node(ip.value).get_sub_node(protocol.value).insert_port(port.value)
+                new_root.insert_sub_node(ip.value).insert_sub_node(protocol.value).insert_sub_node(port.value)
 
     return new_root
 
